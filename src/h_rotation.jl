@@ -41,12 +41,12 @@ function h_Algorithm{T<:AbstractFloat}(x::T, y::T)
   @assert abs(x)  > abs(y) string("h_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
   c    = Array(T,3)
   ρ    = y/x
-  α    = sqrt(x^2-y^2)
+  α    = sqrt(sumabs2(x)-sumabs2(y))
   β    = α*ρ
   R    = sqrt(α^2-β^2)
   c[1] = α/R
   c[2] = (α+β)/R
-  c[3] = 1-abs(ρ)
+  c[3] = (abs(α)- abs(β))/abs(α) #(abs(α)- abs(β))/abs(α)   #1-abs(ρ)
   return α, β, ρ, c
 end
 
@@ -184,8 +184,9 @@ function _h_mul{T1<:AbstractFloat,T2<:AbstractFloat}(x::T1, y::T1, H::H_procedur
   # abs(x) > abs(y) assumed
   α,β,ρ    = H.α,  H.β,  H.ρ
   c        = H.c
-  if ρ*y/x < 0.5
-    xi = 1 - ρ*y/x
+  f        = (β*y)/(α*x)
+  if f < 0.5
+    xi = 1 - f
   else
     d2 = (abs(x)-abs(y))/abs(x)
     xi = c[3] + d2 - c[3]*d2

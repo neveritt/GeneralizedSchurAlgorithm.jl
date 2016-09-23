@@ -1,5 +1,6 @@
 function _householder_left{M1<:StridedMatrix}(A::M1,first::Bool=true)
   T = eltype(A)
+  N = size(A,2)
   x = A[:,1]
   n = length(x)
   α = x[1,1]
@@ -7,7 +8,10 @@ function _householder_left{M1<:StridedMatrix}(A::M1,first::Bool=true)
   β, τ   = larfg!(α, view(x,2:n))
   x[1,1] = one(T)
 
-  larfx!('L', A, x, τ[])
+  A[2:n,1] = zeros(T,n-1)
+  A[1,1]   = β[]
+
+  larfx!('L', view(A,:,2:N), x, τ[])
 end
 
 for (larf, larfg, larfx, elty) in
