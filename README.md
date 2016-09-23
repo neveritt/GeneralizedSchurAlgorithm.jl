@@ -1,6 +1,7 @@
 # GeneralizedSchurAlgorithm
 
-Short description
+This package aims at providing backward stable version [1] of generalized Schur
+algorithm for indefinite matrices. This package is unfinished, untested and new.
 
 ### Build Status and Code Coverage
 
@@ -16,4 +17,15 @@ Short description
 
 ### Description
 
-Long description
+This package aims at providing backward stable version[1] of generalized Schur
+algorithm for indefinite matrices. In particular the goal is to provide some of
+the functionality regarding Toeplitz matrices from the
+[SLICOT Library](https://github.com/KTH-AC/slicot) [2].
+
+### References
+-  [1] [Kailath, T. and Sayed, A. Fast Reliable Algorithms for Matrices with
+        Structure. SIAM Publications, Philadelphia,
+        1999](http://epubs.siam.org/doi/book/10.1137/1.9781611971354)
+-  [2] [Kressner, D. and Van Dooren, P. Factorizations and linear system solvers
+        for matrices with Toeplitz structure. SLICOT Working Note 2000-2,
+        2000](www.icm.tu-bs.de/NICONET/REPORTS/SLWN2000-2.ps.gz)
