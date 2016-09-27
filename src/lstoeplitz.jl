@@ -63,8 +63,8 @@ julia> norm(x-x̂)
 -  [1]: T. Kailath and A. H. Sayed, Fast Reliable Algorithms for Matrices
       with Structure, Society for Industrial and Applied Mathematics, 1999.
 """
-function lstoeplitz{T1<:AbstractFloat, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
-  T   = promote_type(T1, eltype(b))
+function lstoeplitz{T1<:Number, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
+  T   = promote_type(T1,eltype(b),Float32)
   m,n = blocksize(A)
   k,l = sizeofblock(A)
   M,N = size(A)
@@ -83,7 +83,7 @@ function lstoeplitz{T1<:AbstractFloat, M1<:AbstractArray}(A::BlockToeplitz{T1}, 
     GR[i*l+(1:l),l+k+l+(1:k)] = getblock(A,i-m).'
   end
 
-  β = 4*(m*k*n*l)^(4/3)*eps(Float64)
+  β = 4*(m*k*n*l)^(4/3)*eps(T)
   GQ[:,1:l]       = C
   GQ[:,l+k+(1:l)] = C
   for i = 1:k
@@ -92,26 +92,26 @@ function lstoeplitz{T1<:AbstractFloat, M1<:AbstractArray}(A::BlockToeplitz{T1}, 
   end
 
   # construct shift matrix Z
-  Z1 = spdiagm(ones(l*(n-1)),l,l*n,l*n)
-  Z2 = spdiagm(ones(k*(m-1)),k,k*m,k*m)
-  Z::SparseMatrixCSC{T,Int} = [Z1 spzeros(T,n*l,m*k); spzeros(T,m*k,n*l) Z2]
+  Z1::SparseMatrixCSC{T,Int} = spdiagm(ones(T,l*(n-1)),l,l*n,l*n)
+  Z2::SparseMatrixCSC{T,Int} = spdiagm(ones(T,k*(m-1)),k,k*m,k*m)
+  Z::SparseMatrixCSC{T,Int}  = [Z1 spzeros(T,n*l,m*k); spzeros(T,m*k,n*l) Z2]
   p = k+l
   q = k+l+k
   G = G.'
 
-  L = zeros(T,m*k+n*l,m*k+n*l)
+  L = Array(T,m*k+n*l,m*k+n*l)
   N = m*k+n*l
   # positive steps
   for i = 1:n*l
-    _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,true)
+    @inbounds _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,true)
   end
   # negative steps
   for i = n*l+1:N
-    _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,false)
+    @inbounds _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,false)
   end
 
   Q, R  = L[1:n*l, n*l+(1:m*k)].', triu(L[1:n*l, 1:n*l])
   D     = tril(L[n*l+(1:m*k), n*l+(1:m*k)].')
   x     = R\(D\Q).'*(D\b)
-  return x, Q, R, D
+  return x
 end

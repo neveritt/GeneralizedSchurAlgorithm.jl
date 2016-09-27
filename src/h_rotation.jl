@@ -19,7 +19,7 @@ immutable H_procedure{T}
   ρ::T
   c::Vector{T}
 
-  function (::Type{H_procedure}){T}(i1::Int, i2::Int, α::T, β::T, ρ::T)
+  @compat function (::Type{H_procedure}){T}(i1::Int, i2::Int, α::T, β::T, ρ::T)
     c    = Array(T,3)
     R    = sqrt(α^2-β^2)
     c[1] = α/R
@@ -28,7 +28,7 @@ immutable H_procedure{T}
     new{T}(i1,i2,α,β,ρ,c)
   end
 
-  function (::Type{H_procedure}){T}(i1::Int, i2::Int, α::T, β::T, ρ::T, c::Array{T})
+  @compat function (::Type{H_procedure}){T}(i1::Int, i2::Int, α::T, β::T, ρ::T, c::Array{T})
     new{T}(i1,i2,α,β,ρ,c)
   end
 end
