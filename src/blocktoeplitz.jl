@@ -23,20 +23,18 @@ T = Toeplitz(vc,vr)
    T_{-m+1} …    …   T_{-m+n}]=#
 
 # General BlockToeplitz matrix
-immutable BlockToeplitz{T<:Number,M1,M2} <: AbstractToeplitz{T}
-    vc::M1
-    vr::M2
+immutable BlockToeplitz{T<:AbstractFloat} <: AbstractToeplitz{T}
+    vc::Matrix{T}
+    vr::Matrix{T}
 
-    function (::Type{BlockToeplitz}){M1,M2}(vc::M1, vr::M2)
-      @assert eltype(M1) == eltype(M2) "Col and row must have same eltype"
+    @compat function (::Type{BlockToeplitz}){T<:AbstractFloat}(vc::Matrix{T}, vr::Matrix{T})
       k = size(vr,1)
       l = size(vc,2)
       if !isapprox(vc[1:k,1:l], vr[1:k,1:l])
         warn("First block element must be the same")
         throw(DomainError())
       end
-      T = promote_type(eltype(M1), eltype(M2), Float32)
-      new{T,M1,M2}(vc,vr)
+      new{T}(vc,vr)
     end
 end
 
@@ -133,7 +131,7 @@ function full{T}(A::BlockToeplitz{T})
   return Af
 end
 
-# Fast application of a general Toeplitz matrix to a column vector via FFT
+# Application of a general Toeplitz matrix to a column vector
 function A_mul_B!{T}(α::T, A::BlockToeplitz{T}, x::StridedVector{T}, β::T, y::StridedVector{T})
   m = size(A,1)
   n = size(A,2)

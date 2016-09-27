@@ -39,7 +39,7 @@ L̂ = [R̂^T  0;
      Q̂    D]
 
 and then computes
-x̂ = R̂\(D\Q̂).'*(D\b)
+x̂ = R̂\(D\Q̂).'(D\b)
 
 # Examples
 ```julia
@@ -55,7 +55,7 @@ julia> b = T*x + 0.1*randn(size(T,1));
 
 julia> x̂,Q,R,D = lstoeplitz(col,row,b);
 
-julia> norm(x-̂x̂)
+julia> norm(x-x̂)
 ```
 
 # References
@@ -64,7 +64,7 @@ julia> norm(x-̂x̂)
       with Structure, Society for Industrial and Applied Mathematics, 1999.
 """
 function lstoeplitz{T1<:AbstractFloat, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
-  T   = promote_type(T1,eltype(b))
+  T   = promote_type(T1, eltype(b))
   m,n = blocksize(A)
   k,l = sizeofblock(A)
   M,N = size(A)
