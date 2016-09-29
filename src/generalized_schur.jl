@@ -49,7 +49,7 @@ function _step{M1<:StridedMatrix, M2<:AbstractMatrix}(
   if abs(G[idx1,1]) < abs(G[idx2,1]) # ensure positive/negative definite step
     G[idx1,1] = abs(G[idx2,1])*(1 + 3*eps(T))*sign(G[1,1])
   end
-  h = h_procedure(G[idx1,1],G[idx2,1],idx1,idx2)[1]
+  h = oe_procedure(G[idx1,1],G[idx2,1],idx1,idx2)[1]
   A_mul_B!(h, G)
   L[:] = G[idx1,:]
   G[idx1,:] = (L.'*F).'

@@ -46,7 +46,7 @@ function qrtoeplitz{T<:Number}(A::BlockToeplitz{T})
   S = A.'*C
 
   # construct generator G
-  G = zeros(T,N+M, l+k+l+k)
+  G  = zeros(T,N+M, l+k+l+k)
   GR = view(G, 1:N, 1:2l+2k)
   GQ = view(G, N+1:N+M, 1:2l+2k)
   GR[:,1:l]         = S
@@ -69,7 +69,7 @@ function qrtoeplitz{T<:Number}(A::BlockToeplitz{T})
   p = k+l
   q = k+l
 
-  L = Array(T,m*k+n*l,m*k+n*l)
+  L = Array(T,n*l,m*k+n*l)
   G = G.'
   N = size(G,2)
   for i = 1:n*l

@@ -1,13 +1,15 @@
+
+
 """
     H_procedure(i1,i2,α,β,ρ) -> H
 A hyperbolic rotation operator implemented by the H-procedure.
 
-The fields `α`, `β` and `ρ = `β/α`` represent the hyperbolic rotation.
+The fields `α`, `β` and `ρ = β/α` represent the hyperbolic rotation.
 
 The `H_procedure` type supports left multiplication `H*A` and conjugated transpose
 right multiplication `A*H'`. The type doesn't have a `size` and can therefore
 be multiplied with matrices of arbitrary size as long as `i2<=size(A,2)` for
-`H*A` or `i2<=size(A,1)` for `A*H'`.
+`H*A` or `i2<=size(A,1)` for `A*H`.
 """
 immutable H_procedure{T}
   i1::Int
@@ -41,9 +43,10 @@ function h_Algorithm{T<:AbstractFloat}(x::T, y::T)
   @assert abs(x)  > abs(y) string("h_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
   c    = Array(T,3)
   ρ    = y/x
-  α    = sqrt(sumabs2(x)-sumabs2(y))
+  tmp  = sqrt(1-ρ)*sqrt(1+ρ)
+  α    = abs(x)*tmp      # sqrt(sumabs2(x)-sumabs2(y))
   β    = α*ρ
-  R    = sqrt(α^2-β^2)
+  R    = sqrt(α-β)*sqrt(α+β)    #sqrt(α^2-β^2)
   c[1] = α/R
   c[2] = (α+β)/R
   c[3] = (abs(α)- abs(β))/abs(α) #(abs(α)- abs(β))/abs(α)   #1-abs(ρ)
