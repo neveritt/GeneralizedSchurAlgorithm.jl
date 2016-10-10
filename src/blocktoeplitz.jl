@@ -1,5 +1,3 @@
-import ToeplitzMatrices: AbstractToeplitz, Toeplitz
-import Base: size, getindex, convert
 """
 A block Toeplitz matrix is constructed by the first block column and
 first block row.
@@ -23,11 +21,11 @@ T = Toeplitz(vc,vr)
    T_{-m+1} …    …   T_{-m+n}]=#
 
 # General BlockToeplitz matrix
-immutable BlockToeplitz{T<:AbstractFloat} <: AbstractToeplitz{T}
+immutable BlockToeplitz{T<:Number} <: AbstractToeplitz{T}
     vc::Matrix{T}
     vr::Matrix{T}
 
-    @compat function (::Type{BlockToeplitz}){T<:AbstractFloat}(vc::Matrix{T}, vr::Matrix{T})
+    @compat function (::Type{BlockToeplitz}){T<:Number}(vc::Matrix{T}, vr::Matrix{T})
       k = size(vr,1)
       l = size(vc,2)
       if !isapprox(vc[1:k,1:l], vr[1:k,1:l])
@@ -119,6 +117,9 @@ getrow(A::BlockToeplitz) = A.vr
 
 convert(::Type{Matrix}, A::BlockToeplitz) = full(A)
 
+transpose(A::BlockToeplitz)  = BlockToeplitz(A.vr.', A.vc.')
+ctranspose(A::BlockToeplitz) = BlockToeplitz(A.vr', A.vc')
+
 # Full version of a BlockToeplitz matrix
 function full{T}(A::BlockToeplitz{T})
   m, n = size(A)
@@ -167,4 +168,41 @@ end
      A_mul_B!(one(T), A, B, zero(T), zeros(T, size(A,1), size(B,2)))
 
 (*){T}(A::BlockToeplitz{T}, B::StridedVector{T}) =
-      A_mul_B!(one(T), A, B, zero(T), zeros(T, size(A,1)))
+    A_mul_B!(one(T), A, B, zero(T), zeros(T, size(A,1)))
+
+# Application of a general Toeplitz matrix to a column vector
+function At_mul_B!{T}(α::T, A::BlockToeplitz{T}, x::StridedVector{T}, β::T, y::StridedVector{T})
+  m = size(A,2)
+  n = size(A,1)
+  if m != length(y)
+    throw(DimensionMismatch(""))
+  end
+  if n != length(x)
+    throw(DimensionMismatch(""))
+  end
+  y[:] *= β
+  for j = 1:n
+    tmp = α * x[j]
+    for i = 1:m
+      y[i] += tmp*A[j,i]
+    end
+  end
+  return y
+end
+
+# Application of a general Toeplitz matrix to a general matrix
+function At_mul_B!{T}(α::T, A::BlockToeplitz{T}, B::StridedMatrix{T}, β::T, C::StridedMatrix{T})
+  l = size(B, 2)
+  if size(C, 2) != l
+      throw(DimensionMismatch("input and output matrices must have same number of columns"))
+  end
+  for j = 1:l
+    At_mul_B!(α::T, A, view(B, :, j), β::T, view(C, :, j))
+  end
+  return C
+end
+
+At_mul_B{T}(A::BlockToeplitz{T}, B::StridedMatrix{T}) =
+            At_mul_B!(one(T), A, B, zero(T), zeros(T, size(A,2), size(B,2)))
+At_mul_B{T}(A::BlockToeplitz{T}, B::StridedVector{T}) =
+            At_mul_B!(one(T), A, B, zero(T), zeros(T, size(A,2)))

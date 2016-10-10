@@ -24,7 +24,7 @@ ctranspose(H::OE_procedure) = H
 
 function oe_algorithm{T<:AbstractFloat}(x::T, y::T)
   @assert abs(x)  > abs(y) string("h_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
-  if x == zero(T)
+  if y == zero(T)
     s = zero(T)
     c = one(T)
   else
@@ -134,7 +134,7 @@ function A_mul_B!{M1<:AbstractMatrix,T<:AbstractFloat}(H::OE_procedure{T}, A::M1
   if H.i2 > m
     throw(DimensionMismatch("column indices for rotation are outside the matrix"))
   end
-  _oe_mul!(A,H)
+  _oe_mul!(view(A,H.i1,:),view(A,H.i2,:),H)
   return A
 end
 
@@ -143,17 +143,15 @@ function A_mul_Bc!{M1<:AbstractMatrix,T<:AbstractFloat}(A::M1, H::OE_procedure{T
     if H.i2 > n
         throw(DimensionMismatch("row indices for rotation are outside the matrix"))
     end
-    _oe_mul!(A,H)
+    _oe_mul!(view(A,:,H.i1),view(A,:,H.i2),H)
+    #_oe_mul!(A,H)
     return A
 end
 
-function _oe_mul!{M1<:AbstractMatrix,T2<:AbstractFloat}(A::M1, H::OE_procedure{T2})
-  T = promote_type(eltype(A),T2)
-  x = view(A,H.i1,:)
-  y = view(A,H.i2,:)
+function _oe_mul!{V1<:AbstractVector,T2<:AbstractFloat}(x::V1,y::V1, H::OE_procedure{T2})
+  T = promote_type(eltype(x),T2,Float32)
   # abs(x) > abs(y) assumed
   c,s = H.c,H.s
-  n   = size(x,1)
   scale!(x, one(T)/c)
   axpy!(-s/c, y, x)
   scale!(c, y)

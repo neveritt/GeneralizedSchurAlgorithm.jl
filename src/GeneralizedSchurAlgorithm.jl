@@ -1,8 +1,9 @@
 module GeneralizedSchurAlgorithm
 
 # Import functions for overloading
-import Base: A_mul_B!, A_mul_Bc!
-import Base: size, getindex, convert, ctranspose, (*)
+import Base: A_mul_B!, A_mul_Bc!, At_mul_B!, At_mul_B
+import Base: size, getindex, convert, transpose, ctranspose, (*)
+import Compat.view
 
 import Base.LinAlg: BlasFloat, Char, BlasInt, LAPACKException, axpy!, BLAS.scal!
 
@@ -20,9 +21,11 @@ export
   getrow,
   # h_rotation
   H_procedure,
+  h_procedure,
   h_Algorithm,
   # oe_rotation
   OE_procedure,
+  oe_procedure,
   oe_algorithm,
   # generalized_schur
   schuralgorithm,
