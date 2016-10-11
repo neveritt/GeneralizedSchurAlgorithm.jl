@@ -83,7 +83,7 @@ function lstoeplitz{T1<:Number, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
     GR[i*l+(1:l),l+k+l+(1:k)] = getblock(A,i-m).'
   end
 
-  β = 4*(m*k*n*l)^(4/3)*eps(T)
+  β = 4*(m*k*n*l)^(4/3)*eps(T) # tuning parameter to ensure negative steps
   GQ[:,1:l]       = C
   GQ[:,l+k+(1:l)] = C
   for i = 1:k
@@ -91,23 +91,21 @@ function lstoeplitz{T1<:Number, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
     GQ[i,2k+2l+i] = 1+β
   end
 
-  # construct shift matrix Z
-  Z1::SparseMatrixCSC{T,Int} = spdiagm(ones(T,l*(n-1)),l,l*n,l*n)
-  Z2::SparseMatrixCSC{T,Int} = spdiagm(ones(T,k*(m-1)),k,k*m,k*m)
-  Z::SparseMatrixCSC{T,Int}  = [Z1 spzeros(T,n*l,m*k); spzeros(T,m*k,n*l) Z2]
+  # iterate
   p = k+l
   q = k+l+k
   G = G.'
-
   L = Array(T,m*k+n*l,m*k+n*l)
   N = m*k+n*l
   # positive steps
   for i = 1:n*l
-    @inbounds _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,true)
+    @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
+    _downshift!(view(G,1,:),view(L,i,:),l,k,i,N,l*n)
   end
   # negative steps
   for i = n*l+1:N
-    @inbounds _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,false)
+    @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,false)
+    _downshift!(view(G,p+1,:),view(L,i,:),l,k,i,N,l*n)
   end
 
   Q, R  = L[1:n*l, n*l+(1:m*k)].', triu(L[1:n*l, 1:n*l])

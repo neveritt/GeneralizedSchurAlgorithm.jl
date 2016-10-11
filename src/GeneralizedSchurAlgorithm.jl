@@ -37,6 +37,7 @@ export
 using Compat
 
 # include files
+include("utilities.jl")
 include("blocktoeplitz.jl")
 include("generalized_schur.jl")
 include("h_rotation.jl")

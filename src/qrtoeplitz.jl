@@ -62,18 +62,15 @@ function qrtoeplitz{T<:Number}(A::BlockToeplitz{T})
     GQ[i,l+i] = one(T)
   end
 
-  # construct shift matrix Z (right now this is taking alot of allocations)
-  Z1::SparseMatrixCSC{T,Int} = spdiagm(ones(T,l*(n-1)),l,l*n,l*n)
-  Z2::SparseMatrixCSC{T,Int} = spdiagm(ones(T,k*(m-1)),k,k*m,k*m)
-  Z::SparseMatrixCSC{T,Int}  = [Z1 spzeros(T,n*l,m*k); spzeros(T,m*k,n*l) Z2]
+  # iterate
   p = k+l
   q = k+l
-
   L = Array(T,n*l,m*k+n*l)
   G = G.'
   N = size(G,2)
   for i = 1:n*l
-    @inbounds _step(view(G,:,i:N), Z[i:N,i:N], view(L,i,i:N),p,q,true)
+    @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
+    _downshift!(view(G,1,:),view(L,i,:),l,k,i,N,l*n)
   end
 
   return L[1:n*l, n*l+(1:m*k)].', triu(L[1:n*l, 1:n*l])
