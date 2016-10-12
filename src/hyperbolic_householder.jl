@@ -12,7 +12,7 @@ function _hyper_householder{M1<:AbstractMatrix}(A::M1,g::Int,p::Int,q::Int,work:
   A_mul_B!(work,H,A)
 end
 
-function _hyper_householder{M1<:AbstractMatrix}(A,g,p::Int,q::Int)
+function _hyper_householder{M1<:AbstractMatrix}(A::M1,g,p::Int,q::Int)
   gp   = g[1:p]
   gq   = g[p+1:p+q]
   gJgT = sumabs2(gp) - sumabs2(gq)

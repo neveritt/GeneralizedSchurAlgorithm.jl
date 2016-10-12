@@ -1,6 +1,5 @@
 # generalized schur algorithm
 
-
 """
   schuralgorithm(G, F, p, q) -> L, D
 
@@ -51,8 +50,7 @@ function _step{M1<:StridedMatrix}(
   if abs(G[idx1,1]) < abs(G[idx2,1]) # ensure positive/negative definite step
     G[idx1,1] = abs(G[idx2,1])*(1 + 3*eps(T))*sign(G[1,1])
   end
-  h = oe_procedure(G[idx1,1],G[idx2,1],idx1,idx2)[1]
+  h = h_procedure(G[idx1,1],G[idx2,1],idx1,idx2)[1]
   A_mul_B!(h, G)
   L[:] = G[idx1,:]
-#  G[idx1,:] = (L.'*F).'
 end

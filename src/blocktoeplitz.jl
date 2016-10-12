@@ -47,9 +47,6 @@ function size(A::BlockToeplitz, dim::Int)
     return size(A.vr,2)
   elseif dim > 2
     return 1
-  else
-    warn("arraysize: dimension out of range")
-    throw(DomainError())
   end
 end
 
@@ -61,9 +58,6 @@ function blocksize(A::BlockToeplitz, dim::Int)
     return convert(Int,div(size(A.vr,2),sizeofblock(A,2)))
   elseif dim > 2
     return 1
-  else
-    warn("arraysize: dimension out of range")
-    throw(DomainError())
   end
 end
 blocksize(A::BlockToeplitz) = (blocksize(A,1), blocksize(A,2))
@@ -76,9 +70,6 @@ function sizeofblock(A::BlockToeplitz, dim::Int)
     return size(A.vc,2)
   elseif dim > 2
     return 1
-  else
-    warn("arraysize: dimension out of range")
-    throw(DomainError())
   end
 end
 sizeofblock(A::BlockToeplitz) = (sizeofblock(A,1), sizeofblock(A,2))
