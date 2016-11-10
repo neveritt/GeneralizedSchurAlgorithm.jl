@@ -4,7 +4,7 @@
     OE_procedure(i1,i2,α,β,ρ) -> H
 A hyperbolic rotation operator implemented by the H-procedure.
 
-The `H_procedure` type supports left multiplication `H*A` and conjugated transpose
+The `OE_procedure` type supports left multiplication `H*A` and conjugated transpose
 right multiplication `A*H'`. The type doesn't have a `size` and can therefore
 be multiplied with matrices of arbitrary size as long as `i2<=size(A,2)` for
 `H*A` or `i2<=size(A,1)` for `A*H`.
@@ -21,22 +21,23 @@ convert{T}(::Type{OE_procedure{T}}, H::OE_procedure)    = OE_procedure(H.i1, H.i
   convert(T, H.c), convert(T, H.s))
 
 ctranspose(H::OE_procedure) = H
+transpose(H::OE_procedure)  = H
 
 function oe_algorithm{T<:AbstractFloat}(x::T, y::T)
-  @assert abs(x)  > abs(y) string("h_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
+  @assert abs(x)  > abs(y) string("oe_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
   if y == zero(T)
     s = zero(T)
     c = one(T)
   else
     s = y/x
-    c = sign(x)*sqrt(one(T)-s)*sqrt(one(T)+s)
+    c = sign(x)*sqrt(one(T)-s)*sqrt(one(T)+s)  #sign(x)*
     x = c*x
   end
   return c,s,x
 end
 
 """
-    h_procedure{T}(f::T, g::T, i1::Integer, i2::Integer) -> (H::H_procedure, r::T)
+    oe_procedure{T}(f::T, g::T, i1::Integer, i2::Integer) -> (H::OE_procedure, r::T)
 Computes the Hyperbolic rotation `H` such that for any vector `x` where
 ```
 x[i1] = f
@@ -72,7 +73,7 @@ function oe_procedure{T}(f::T, g::T, i1::Integer, i2::Integer)
   end
 end
 """
-    h_procedure(A::AbstractArray, i1::Integer, i2::Integer, j::Integer) -> (H::H_procedure, r)
+    oe_procedure(A::AbstractArray, i1::Integer, i2::Integer, j::Integer) -> (H::OE_procedure, r)
 Computes the Hyperbolic rotation `H` and scalar `r` such that the result of the multiplication
 ```
 B = H*A
@@ -93,7 +94,7 @@ oe_procedure(A::AbstractMatrix, i1::Integer, i2::Integer, j::Integer) =
 
 
 """
-    givens(A::AbstractVector, i1::Integer, i2::Integer) -> (H::H_procedure, r)
+    oe_procedure(A::AbstractVector, i1::Integer, i2::Integer) -> (H::OE_procedure, r)
 Computes the Hyperbolic rotation `H` and scalar `r` such that the result of the multiplication
 ```
 B = H*f
@@ -114,14 +115,14 @@ oe_procedure(A::AbstractVector, i1::Integer, i2::Integer) =
 function getindex(H::OE_procedure, i::Integer, j::Integer)
     if i == j
         if i == H.i1 || i == H.i2
-            H.c
+            1/H.c
         else
             one(H.c)
         end
     elseif i == H.i1 && j == H.i2
-        -H.s
+        -H.s/H.c
     elseif i == H.i2 && j == H.i1
-        -H.s
+        -H.s/H.c
     else
         zero(H.s)
     end

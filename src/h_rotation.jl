@@ -21,10 +21,10 @@ immutable H_procedure{T}
 
   @compat function (::Type{H_procedure}){T}(i1::Int, i2::Int, α::T, β::T, ρ::T)
     c    = Array(T,3)
-    R    = sqrt(α^2-β^2)
+    R    = sqrt(α-β)*sqrt(α+β)    # sqrt(α^2-β^2)
     c[1] = α/R
     c[2] = (α+β)/R
-    c[3] = 1-abs(ρ)
+    c[3] = (abs(α)- abs(β))/abs(α)        # 1-abs(ρ)
     new{T}(i1,i2,α,β,ρ,c)
   end
 
@@ -38,18 +38,19 @@ convert{T}(::Type{H_procedure{T}}, H::H_procedure)    = H_procedure(H.i1, H.i2,
   convert(T, H.α), convert(T, H.β), convert(T, H.ρ), convert(Vector{T}, H.c))
 
 ctranspose(H::H_procedure) = H
+transpose(H::H_procedure)  = H
 
-function h_Algorithm{T<:AbstractFloat}(x::T, y::T)
+function h_Algorithm{T}(x::T, y::T)
   @assert abs(x)  > abs(y) string("h_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
   c    = Array(T,3)
   ρ    = y/x
   tmp  = sqrt(1-ρ)*sqrt(1+ρ)
-  α    = abs(x)*tmp      # sqrt(sumabs2(x)-sumabs2(y))
+  α    = abs(x)*tmp
   β    = α*ρ
-  R    = sqrt(α-β)*sqrt(α+β)    #sqrt(α^2-β^2)
-  c[1] = α/R
+  R    = sign(x)*sqrt(α-β)*sqrt(α+β)    # this sign(x) is motivated by the sign in
+  c[1] = α/R                            # the corresponding Slicot routine which uses oe-procedure
   c[2] = (α+β)/R
-  c[3] = (abs(α)- abs(β))/abs(α) #(abs(α)- abs(β))/abs(α)   #1-abs(ρ)
+  c[3] = (abs(α)- abs(β))/abs(α)
   return α, β, ρ, c
 end
 
@@ -111,7 +112,7 @@ h_procedure(A::AbstractMatrix, i1::Integer, i2::Integer, j::Integer) =
 
 
 """
-    givens(A::AbstractVector, i1::Integer, i2::Integer) -> (H::H_procedure, r)
+    h_procedure(A::AbstractVector, i1::Integer, i2::Integer) -> (H::H_procedure, r)
 Computes the Hyperbolic rotation `H` and scalar `r` such that the result of the multiplication
 ```
 B = H*f
@@ -132,14 +133,14 @@ h_procedure(A::AbstractVector, i1::Integer, i2::Integer) =
 function getindex(H::H_procedure, i::Integer, j::Integer)
     if i == j
         if i == H.i1 || i == H.i2
-            H.α
+            H.c[1]
         else
             one(H.α)
         end
     elseif i == H.i1 && j == H.i2
-        -H.β
+        -H.c[1]*H.ρ
     elseif i == H.i2 && j == H.i1
-        -H.β
+        -H.c[1]*H.ρ
     else
         zero(H.α)
     end

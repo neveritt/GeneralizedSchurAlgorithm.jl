@@ -1,44 +1,29 @@
 println("Starting Toeplitz test...")
 
-# Define the true system
-a = [0.5, 0.2, 0.1]
-b = [0.1, 0.3, 0.2]
+ϵ_t  = 1e-10
 
-# model orders
-na, nb = 3, 3
-nk = 1
-n = [na, nb, nk]
-
-# generate input data+noise and simulate output
-A = [1;a]
-B = [0;b]
-N = 3000
-
-u = randn(N)
-λ = 1e1
-e = sqrt(λ)*randn(N)
-y = filt(B,A,u) + filt(1,A,e)
-
-col = hcat(-y[1:end-1],u[1:end-1])
-row = zeros(1,6)
-row[1,1:2] = col[1,1:2]
-Y = y[2:end]
-T = Toeplitz(col,row)
+N = 1000; m = 200; σ = 1; λ=1e1
+T,Y,a,b = gen_toeplitz(N, m, σ, λ)
+na = length(a); nb = length(b)
 
 # test QR - factorization
 Q,R = qrtoeplitz(T)
-
-@test norm(Q*R-T) < 1e-10
+Q2,R2 = qrtoeplitz(getcol(T),getrow(T))
+@test norm(Q   - Q2) < ϵ_t
+@test norm(R   - R2) < ϵ_t
+@test norm(Q*R -  T) < ϵ_t
 
 # test least squares solver
-x̂ = lstoeplitz(T,Y)
+x̂  = lstoeplitz(T,Y)
+x1 = lstoeplitz(getcol(T),getrow(T),Y)
+@test norm(x̂-x1) < ϵ_t
 
 Q,R = qr(full(T))
 x = R\(Q.'*Y)
 @test norm(x̂-x) < 1e-3
 
 # test against true parameters
-x0 = zeros(length(a)+length(b))
-x0[1:2:end-1] = a
-x0[2:2:end]   = b
-@test norm(x̂-x0) < 2λ
+x0 = zeros(size(T,2)) #zeros(length(a)+length(b))
+x0[1:2:na+nb-1] = a
+x0[2:2:na+nb]   = b
+@test norm(x̂-x0) < 5λ/σ^2*m/N
