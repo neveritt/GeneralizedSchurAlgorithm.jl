@@ -25,7 +25,7 @@ Tcf = full(Tc)
 # transpose
 @test T.' ≈ Tf.'
 @test Tc'  ≈ Tcf'
-
+size(T,3)
 # dimensions
 @test size(T)           == (M,N)
 @test size(T,3)         == 1
@@ -37,14 +37,14 @@ Tcf = full(Tc)
 # getblock
 @test getblock(T,-p+1) ≈ col[M-k+1:M,:]
 @test getblock(T, s-1) ≈ row[:,N-l+1:N]
-@test_throws DomainError getblock(T, s)
+@test_throws BoundsError getblock(T, s)
 
 # getindex
 for i in eachindex(T)
   @test T[i]  ≈ Tf[i]
   @test Tc[i] ≈ Tcf[i]
 end
-@test_throws DomainError getindex(T,M,N+1)
+@test_throws BoundsError getindex(T,M,N+1)
 
 # getcol and getrow
 @test getcol(T) ≈ col

@@ -43,7 +43,7 @@ function qrtoeplitz{T<:Number}(A::BlockToeplitz{T})
   k,l = sizeofblock(A)
   M,N = size(A)
   C,R = qr(getcol(A))
-  S = A.'*C
+  S   = A.'*C
 
   # construct generator G
   G  = zeros(T,N+M, l+k+l+k)
