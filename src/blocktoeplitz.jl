@@ -21,13 +21,13 @@ T = Toeplitz(vc,vr)
    T_{-m+1} …    …   T_{-m+n}]=#
 
 # General BlockToeplitz matrix
-immutable BlockToeplitz{T<:Number} <: AbstractToeplitz{T}
-    vc::Matrix{T}
-    vr::Matrix{T}
+immutable BlockToeplitz{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix} <: AbstractToeplitz{T}
+    vc::M1
+    vr::M2
     m::Int
     n::Int
 
-    @compat function (::Type{BlockToeplitz}){T<:Number}(vc::Matrix{T}, vr::Matrix{T})
+    @compat function (::Type{BlockToeplitz}){T<:Number}(vc::AbstractMatrix{T}, vr::AbstractMatrix{T})
       k = size(vr,1)
       l = size(vc,2)
       mk = size(vc,1)
@@ -38,7 +38,7 @@ immutable BlockToeplitz{T<:Number} <: AbstractToeplitz{T}
         warn("First block element must be the same")
         throw(DomainError())
       end
-      new{T}(vc,vr,m,n)
+      new{T,typeof(vc),typeof(vr)}(vc,vr,m,n)
     end
 end
 
@@ -50,8 +50,17 @@ function size(A::BlockToeplitz, dim::Int)
   @assert dim > 0 "size: dim must be positive"
   dim == 1 ? size(A.vc,1) : dim == 2 ? size(A.vr,2) : 1
 end
-size(A::BlockToeplitz)                      = (size(A.vc,1), size(A.vr,2))
-size(A::BlockToeplitz, dims::Int...)        = map(x-> size(A, x), dims)
+size(A::BlockToeplitz)               = (size(A.vc,1), size(A.vr,2))
+size(A::BlockToeplitz, dims::Int...) = map(x-> size(A, x), dims)
+
+zero{T}(A::BlockToeplitz{T})         = BlockToeplitz(spzeros(T,size(A.vc)...),
+  spzeros(T,size(A.vr)...))
+
+
+eltype{T}(A::BlockToeplitz{T}) = T
+promote_type{T,S}(A::BlockToeplitz{T}, c::S) = BlockToeplitz{promote_type(T,S)}
+
+convert{T,S<:Number}(::Type{BlockToeplitz{T}}, c::S) = BlockToeplitz(fill(convert(T,c),1,1),fill(convert(T,c),1,1))
 
 function blocksize(A::BlockToeplitz, dim::Int)
   @assert dim > 0 "blocksize: dim must be positive"
@@ -158,6 +167,20 @@ function A_mul_B_block!{T}(α::T, A::BlockToeplitz{T}, B::StridedMatrix{T}, β::
   end
   return C
 end
+
++{T<:Number}(A1::BlockToeplitz{T}, A2::BlockToeplitz{T}) = BlockToeplitz(A1.vc+A2.vc, A1.vr+A2.vr)
+
+.*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .*(A, c)
+.*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = BlockToeplitz(A.vc*c, A.vr*c)
+
+*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .*(A, c)
+*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = .*(A, c)
+
+.+{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .+(A, c)
+.+{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = BlockToeplitz(A.vc+ones(A.vc)*c, A.vr+ones(A.vr)*c)
+
++{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .+(A, c)
++{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = .+(A, c)
 
 
 (*){T}(A::BlockToeplitz{T}, B::StridedMatrix{T}) =

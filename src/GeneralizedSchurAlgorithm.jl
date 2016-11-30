@@ -2,11 +2,12 @@ module GeneralizedSchurAlgorithm
 
 # Import functions for overloading
 import Base: A_mul_B!, A_mul_Bc!, At_mul_B!, At_mul_B
-import Base: size, getindex, convert, transpose, ctranspose, (*)
+import Base: size, eltype, getindex, convert, transpose, ctranspose, promote_rule
 import Compat.view
 
 import Base.LinAlg: BlasFloat, Char, BlasInt, LAPACKException, axpy!, BLAS.scal!
 
+import Base: one, zero, .*, +, .+, -, /, *
 import ToeplitzMatrices: AbstractToeplitz, Toeplitz, full
 
 # Export only the useful functions
