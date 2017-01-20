@@ -76,9 +76,12 @@ end
 sizeofblock(A::BlockToeplitz)               = (size(A.vr,1), size(A.vc,2))
 sizeofblock(A::BlockToeplitz, dims::Int...) = map(x-> sizeofblock(A, x), dims)
 
+linearindexing(A::BlockToeplitz) = Base.LinearFast()
+getindex(A::BlockToeplitz, i::Int) = A[rem(i-1,size(A,1))+1, div(i-1,size(A,1))+1]
+
 function getindex(A::BlockToeplitz, i::Int, j::Int)
-  i ≤ size(A,1) || throw(BoundsError())
-  j ≤ size(A,2) || throw(BoundsError())
+  @boundscheck i ≤ size(A,1) || throw(BoundsError())
+  @boundscheck j ≤ size(A,2) || throw(BoundsError())
   k,l = sizeofblock(A)
   blockidx = div(j-1,l) - div(i-1,k)
   if blockidx >= 0
@@ -89,7 +92,7 @@ end
 
 function getblock(A::BlockToeplitz, i::Int)
   m,n = blocksize(A)
-  (i > n-1 || i < -m+1) && throw(BoundsError())
+  @boundscheck (i > n-1 || i < -m+1) && throw(BoundsError())
   k,l = sizeofblock(A)
   if i >= 0
     @inbounds return A.vr[1:k, i*l+(1:l)]
@@ -108,9 +111,9 @@ ctranspose(A::BlockToeplitz) = BlockToeplitz(A.vr', A.vc')
 # Full version of a BlockToeplitz matrix
 function full{T}(A::BlockToeplitz{T})
   m, n = size(A)
-  Af = Array(T, m, n)
-  @simd for j = 1:n
-    @simd for i = 1:m
+  Af = Matrix{T}(m, n)
+  @simd for i = 1:m
+    @simd for j = 1:n
       @inbounds Af[i,j] = A[i,j]
     end
   end
