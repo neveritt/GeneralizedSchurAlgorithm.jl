@@ -1,7 +1,7 @@
 module GeneralizedSchurAlgorithm
 
 # Import functions for overloading
-import Base: A_mul_B!, A_mul_Bc!, At_mul_B!, At_mul_B
+import Base.LinAlg: A_mul_B!, A_mul_Bc!, At_mul_B!, At_mul_B
 import Base: size, eltype, getindex, convert, transpose, ctranspose, promote_rule
 import Compat.view
 

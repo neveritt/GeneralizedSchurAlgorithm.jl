@@ -1,7 +1,7 @@
 # GeneralizedSchurAlgorithm
 
 This package aims at providing backward stable version [1] of generalized Schur
-algorithm for indefinite matrices. This package is unfinished, untested and new.
+algorithm for indefinite matrices. This package is under development.
 
 ### Build Status and Code Coverage
 
