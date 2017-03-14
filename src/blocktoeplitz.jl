@@ -27,7 +27,8 @@ immutable BlockToeplitz{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix} <: Abst
     m::Int
     n::Int
 
-    @compat function (::Type{BlockToeplitz}){T<:Number}(vc::AbstractMatrix{T}, vr::AbstractMatrix{T})
+    @compat function (::Type{BlockToeplitz}){M1<:AbstractMatrix,M2<:AbstractMatrix}(vc::M1, vr::M2)
+      vc,vr = promote(vc,vr)
       k = size(vr,1)
       l = size(vc,2)
       mk = size(vc,1)
@@ -38,7 +39,7 @@ immutable BlockToeplitz{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix} <: Abst
         warn("First block element must be the same")
         throw(DomainError())
       end
-      new{T,typeof(vc),typeof(vr)}(vc,vr,m,n)
+      new{eltype(vc),typeof(vc),typeof(vr)}(vc,vr,m,n)
     end
 end
 
@@ -76,12 +77,15 @@ end
 sizeofblock(A::BlockToeplitz)               = (size(A.vr,1), size(A.vc,2))
 sizeofblock(A::BlockToeplitz, dims::Int...) = map(x-> sizeofblock(A, x), dims)
 
-linearindexing(A::BlockToeplitz) = Base.LinearFast()
+@compat Base.IndexStyle(::Type{<:BlockToeplitz}) = IndexCartesian()
 getindex(A::BlockToeplitz, i::Int) = A[rem(i-1,size(A,1))+1, div(i-1,size(A,1))+1]
 
+function checkbounds(A::BlockToeplitz, i::Integer, j::Integer)
+  (i ≤ size(A,1) && j ≤ size(A,2)) || throw(BoundsError())
+end
+
 function getindex(A::BlockToeplitz, i::Int, j::Int)
-  @boundscheck i ≤ size(A,1) || throw(BoundsError())
-  @boundscheck j ≤ size(A,2) || throw(BoundsError())
+  checkbounds(A, i, j)
   k,l = sizeofblock(A)
   blockidx = div(j-1,l) - div(i-1,k)
   if blockidx >= 0
@@ -90,9 +94,13 @@ function getindex(A::BlockToeplitz, i::Int, j::Int)
   return A.vc[-blockidx*k + mod(i-1,k) + 1,  mod(j-1,l) + 1 ]
 end
 
-function getblock(A::BlockToeplitz, i::Int)
+function checkblockbounds(A::BlockToeplitz, i::Integer)
   m,n = blocksize(A)
-  @boundscheck (i > n-1 || i < -m+1) && throw(BoundsError())
+  (i > n-1 || i < -m+1) && throw(BoundsError())
+end
+
+function getblock(A::BlockToeplitz, i::Int)
+  checkblockbounds(A, i)
   k,l = sizeofblock(A)
   if i >= 0
     @inbounds return A.vr[1:k, i*l+(1:l)]
