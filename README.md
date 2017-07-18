@@ -1,19 +1,18 @@
 # GeneralizedSchurAlgorithm
 
+[![Unix][unix-img]][unix-link]
+[![Coveralls][ca-img]][ca-link]
+[![Codecov][cc-img]][cc-link]
+
 This package aims at providing backward stable version [1] of generalized Schur
 algorithm for indefinite matrices. This package is under development.
 
-### Build Status and Code Coverage
-
--  Build status: [![Build Status][build-img]][build-link]
--  Code coverage: [![Coveralls][ca-img]][ca-link] [![Codecov][cc-img]][cc-link]
-
-[build-img]:  https://travis-ci.org/neveritt/GeneralizedSchurAlgorithm.jl.svg?branch=master
-[build-link]: https://travis-ci.org/neveritt/GeneralizedSchurAlgorithm.jl
-[ca-img]: https://coveralls.io/repos/github/neveritt/GeneralizedSchurAlgorithm.jl/badge.svg?branch=master
+[unix-img]: https://img.shields.io/travis/neveritt/GeneralizedSchurAlgorithm.jl/master.svg?label=unix
+[unix-link]: https://travis-ci.org/neveritt/GeneralizedSchurAlgorithm.jl
+[ca-img]: https://img.shields.io/coveralls/neveritt/GeneralizedSchurAlgorithm.jl/master.svg?label=coveralls
 [ca-link]: https://coveralls.io/github/neveritt/GeneralizedSchurAlgorithm.jl?branch=master
-[cc-img]: https://codecov.io/gh/neveritt/GeneralizedSchurAlgorithm.jl/branch/master/graph/badge.svg
-[cc-link]: https://codecov.io/gh/neveritt/GeneralizedSchurAlgorithm.jl
+[cc-img]: https://img.shields.io/codecov/c/github/neveritt/GeneralizedSchurAlgorithm.jl/master.svg?label=codecov
+[cc-link]: https://codecov.io/gh/neveritt/GeneralizedSchurAlgorithm.jl?branch=master
 
 ### Description
 
