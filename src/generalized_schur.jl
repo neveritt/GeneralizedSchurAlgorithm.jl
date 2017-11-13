@@ -21,7 +21,7 @@ function schuralgorithm(G,F,p,q,n)
   L = zeros(Float64,n,N)
   D = zeros(Int,n)
   for i = 1:n
-    if sumabs2(G[1:p,i]) - sumabs2(G[p+1:end,i]) > 0
+    if sum(abs2, G[1:p,i]) - sum(abs2, G[p+1:end,i]) > 0
       _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
       D[i] = 1
       G[1,i:N] = (L[i:i,i:N]*F[i:N,i:N]).'

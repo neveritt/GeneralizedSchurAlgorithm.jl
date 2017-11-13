@@ -35,11 +35,11 @@ for (larf, larfg, larfx, elty) in
       ldc = stride(C,2)
       incv = 1
       if side == 'L'
-        work = Array($elty,n)
+        work = Array{$elty}(n)
       else # side == 'R'
-        work = Array($elty,m)
+        work = Array{$elty}(m)
       end
-      ccall((Compat.@blasfunc($larf),Base.liblapack_name), Void,
+      ccall((Base.LinAlg.BLAS.@blasfunc($larf),Base.liblapack_name), Void,
             (Ptr{UInt8}, Ptr{BlasInt}, Ptr{BlasInt}, Ptr{$elty}, Ptr{BlasInt},
              Ptr{$elty}, Ptr{$elty}, Ptr{BlasInt}, Ptr{$elty}),
             &side, &m, &n, v, &incv, &τ, C, &ldc, work)
@@ -56,7 +56,7 @@ for (larf, larfg, larfx, elty) in
       incx = one(Int)
       τ    = Ref{$elty}()
       β    = Ref{$elty}(α)
-      ccall((Compat.@blasfunc($larfg),Base.liblapack_name), Void,
+      ccall((Base.LinAlg.BLAS.@blasfunc($larfg),Base.liblapack_name), Void,
             (Ptr{BlasInt}, Ptr{$elty}, Ptr{$elty}, Ptr{BlasInt}, Ptr{$elty}),
             &n, β, x, &incx, τ)
 
@@ -76,13 +76,13 @@ for (larf, larfg, larfx, elty) in
 
       ldc = stride(C,2)
       if side == 'L' && m > 10
-        work = Array($elty,n)
+        work = Array{$elty}(n)
       elseif m > 10 # side == 'R'
-        work = Array($elty,m)
+        work = Array{$elty}(m)
       else # work is not referenced if H has order < 11
-        work = Array($elty,0)
+        work = Array{$elty}(0)
       end
-      ccall((Compat.@blasfunc($larfx),Base.liblapack_name), Void,
+      ccall((Base.LinAlg.BLAS.@blasfunc($larfx),Base.liblapack_name), Void,
             (Ptr{UInt8}, Ptr{BlasInt}, Ptr{BlasInt}, Ptr{$elty}, Ptr{$elty},
              Ptr{$elty}, Ptr{BlasInt}, Ptr{$elty}),
             &side, &m, &n, v, &τ, C, &ldc, work)

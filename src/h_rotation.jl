@@ -20,7 +20,7 @@ immutable H_procedure{T}
   c::Vector{T}
 
   @compat function (::Type{H_procedure}){T}(i1::Int, i2::Int, α::T, β::T, ρ::T)
-    c    = Array(T,3)
+    c    = Array{T}(3)
     R    = sqrt(α-β)*sqrt(α+β)    # sqrt(α^2-β^2)
     c[1] = α/R
     c[2] = (α+β)/R
@@ -42,7 +42,7 @@ transpose(H::H_procedure)  = H
 
 function h_Algorithm{T}(x::T, y::T)
   @assert abs(x)  > abs(y) string("h_Algorithm: |x| > |y| required", abs(x) ," abs(y): " , abs(y))
-  c    = Array(T,3)
+  c    = Array{T}(3)
   ρ    = y/x
   tmp  = sqrt(1-ρ)*sqrt(1+ρ)
   α    = abs(x)*tmp

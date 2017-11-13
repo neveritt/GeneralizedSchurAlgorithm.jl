@@ -8,7 +8,7 @@ import Compat.view
 import Base: linearindexing, promote_type, checkbounds
 import Base.LinAlg: BlasFloat, Char, BlasInt, LAPACKException, axpy!, BLAS.scal!
 
-import Base: one, zero, .*, +, .+, -, /, *
+import Base: one, zero, +, -, /, *
 import ToeplitzMatrices: AbstractToeplitz, Toeplitz, full
 
 # Export only the useful functions

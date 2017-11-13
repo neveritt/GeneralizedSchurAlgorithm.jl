@@ -180,19 +180,7 @@ function A_mul_B_block!{T}(α::T, A::BlockToeplitz{T}, B::StridedMatrix{T}, β::
 end
 
 +{T<:Number}(A1::BlockToeplitz{T}, A2::BlockToeplitz{T}) = BlockToeplitz(A1.vc+A2.vc, A1.vr+A2.vr)
-
-.*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .*(A, c)
-.*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = BlockToeplitz(A.vc*c, A.vr*c)
-
-*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .*(A, c)
-*{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = .*(A, c)
-
-.+{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .+(A, c)
-.+{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = BlockToeplitz(A.vc+ones(A.vc)*c, A.vr+ones(A.vr)*c)
-
-+{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(c::T, A::BlockToeplitz{T,M1,M2}) = .+(A, c)
-+{T<:Number,M1<:AbstractMatrix,M2<:AbstractMatrix}(A::BlockToeplitz{T,M1,M2}, c::T) = .+(A, c)
-
+-{T<:Number}(A1::BlockToeplitz{T}, A2::BlockToeplitz{T}) = BlockToeplitz(A1.vc-A2.vc, A1.vr-A2.vr)
 
 (*){T}(A::BlockToeplitz{T}, B::StridedMatrix{T}) =
     A_mul_B_block!(one(T), A, B, zero(T), zeros(T, size(A,1), size(B,2)))

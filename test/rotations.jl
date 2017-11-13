@@ -17,7 +17,7 @@ h12 = h_procedure(C,1,2,1)[1]
 
 for field in fieldnames(h1)
   # H_procedure has a sign difference which is introduce in matrix constructor for increas numerical accuracy
-  @test abs(getfield(h1,field)) ≈ abs(getfield(h11,field))
+  @test abs.(getfield(h1,field)) ≈ abs.(getfield(h11,field))
   @test getfield(h1,field)      ≈ getfield(h12,field)
 end
 h2  = oe_procedure(C[1,1],Ch[2,1],1,2)[1]
@@ -43,7 +43,7 @@ end
 idx2 = 5
 for idx1 = 1:4
   # make sure rotation is defined properly
-  if abs(Ch[idx1,idx1]) < abs(Ch[idx2,idx1])
+  if abs.(Ch[idx1,idx1]) < abs.(Ch[idx2,idx1])
     Ch[idx1,idx1],  Ch[idx2,idx1]  = Ch[idx2,idx1],  Ch[idx1,idx1]
     Coe[idx1,idx1], Coe[idx2,idx1] = Coe[idx2,idx1], Coe[idx1,idx1]
     Cr[idx1,idx1],  Cr[idx2,idx1]  = Cr[idx2,idx1],  Cr[idx1,idx1]
@@ -87,7 +87,7 @@ Cr   = copy(C)
 idx2 = 5
 for idx1 = 1:4
   # make sure rotation is defined properly
-  if abs(Ch[idx1,idx1]) < abs(Ch[idx1,idx2])
+  if abs.(Ch[idx1,idx1]) < abs.(Ch[idx1,idx2])
     Ch[idx1,idx1],  Ch[idx1,idx2]  = Ch[idx1,idx2],  Ch[idx1,idx1]
     Coe[idx1,idx1], Coe[idx1,idx2] = Coe[idx1,idx2], Coe[idx1,idx1]
     Cr[idx1,idx1],  Cr[idx1,idx2]  = Cr[idx1,idx2],  Cr[idx1,idx1]

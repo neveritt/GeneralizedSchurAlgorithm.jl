@@ -58,7 +58,7 @@ C     = randn(N,M)
 Cv    = randn(N)
 Cl    = randn(N+1,M)
 Cvl   = randn(N+1)
-Cc    = complex(C, randn(N,M))
+Cc    = complex.(C, randn(N,M))
 @test T*C  ≈ Tf*C
 @test_throws DimensionMismatch T*Cl
 @test T*Cv ≈ Tf*Cv
@@ -74,7 +74,7 @@ C     = randn(M,N)
 Cv    = randn(M)
 Cl    = randn(M+1,N)
 Cvl   = randn(M+1)
-Cc    = complex(C, randn(M,N))
+Cc    = complex.(C, randn(M,N))
 @test T.'*C   ≈ Tf.'*C
 @test_throws DimensionMismatch T.'*Cl
 @test T.'*Cv ≈ Tf.'*Cv

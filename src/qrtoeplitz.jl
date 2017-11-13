@@ -65,7 +65,7 @@ function qrtoeplitz{T<:Number}(A::BlockToeplitz{T})
   # iterate
   p = k+l
   q = k+l
-  L = Array(T,n*l,m*k+n*l)
+  L = Array{T}(n*l,m*k+n*l)
   G = G.'
   N = size(G,2)
   for i = 1:n*l

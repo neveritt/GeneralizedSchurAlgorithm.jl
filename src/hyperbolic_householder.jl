@@ -1,7 +1,7 @@
 function _hyper_householder{M1<:AbstractMatrix}(A::M1,g::Int,p::Int,q::Int,work::M1)
   gp   = g[1:p]
   gq   = g[p+1:p+q]
-  gJgT = sumabs2(gp) - sumabs2(gq)
+  gJgT = sum(abs2, gp) - sum(abs2, gq)
   β    = 2/gJgT
   B    = β*[gp*gp' -gp*gq'; gq*gp' -gq*gq']
 
@@ -15,7 +15,7 @@ end
 function _hyper_householder{M1<:AbstractMatrix}(A::M1,g,p::Int,q::Int)
   gp   = g[1:p]
   gq   = g[p+1:p+q]
-  gJgT = sumabs2(gp) - sumabs2(gq)
+  gJgT = sum(abs2, gp) - sum(abs2, gq)
   β    = 2/gJgT
   B    = β*[gp*gp' -gp*gq'; gq*gp' -gq*gq']
 

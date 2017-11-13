@@ -95,7 +95,7 @@ function lstoeplitz{T1<:Number, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
   p = k+l
   q = k+l+k
   G = G.'
-  L = Array(T,m*k+n*l,m*k+n*l)
+  L = Array{T}(m*k+n*l,m*k+n*l)
   N = m*k+n*l
   # positive steps
   for i = 1:n*l
