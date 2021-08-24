@@ -19,12 +19,12 @@ Tc = Toeplitz(colc,rowc)
 # construction
 @test_throws DomainError Toeplitz(col,col[1:k,1:l]+ones(k,l))
 
-Tf = full(T)
-Tcf = full(Tc)
+Tf = Matrix(T)
+Tcf = Matrix(Tc)
 
 # transpose
-@test T.' ≈ Tf.'
-@test Tc'  ≈ Tcf'
+@test Matrix(T') ≈ Tf'
+@test Matrix(Tc')  ≈ Tcf'
 size(T,3)
 # dimensions
 @test size(T)           == (M,N)
@@ -75,11 +75,11 @@ Cv    = randn(M)
 Cl    = randn(M+1,N)
 Cvl   = randn(M+1)
 Cc    = complex.(C, randn(M,N))
-@test T.'*C   ≈ Tf.'*C
-@test_throws DimensionMismatch T.'*Cl
-@test T.'*Cv ≈ Tf.'*Cv
-@test_throws DimensionMismatch T.'*Cvl
-@test Tc.'*Cc ≈ Tcf.'*Cc
+@test T'*C   ≈ Tf'*C
+@test_throws DimensionMismatch T'*Cl
+@test T'*Cv ≈ Tf'*Cv
+@test_throws DimensionMismatch T'*Cvl
+@test Tc'*Cc ≈ Tcf'*Cc
 # works in 0.5
 #@test C*T.'   ≈ C*Tf.'
 #@test Cc*Tc.' ≈ Cc*Tcf.'

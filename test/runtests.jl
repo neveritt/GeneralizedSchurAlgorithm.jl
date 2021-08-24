@@ -1,6 +1,7 @@
-using Base.Test
+using Test, LinearAlgebra, DSP, SparseArrays
+import Compat.view
 using GeneralizedSchurAlgorithm
-using Compat.view
+
 
 # function to generate test-case
 include("gen_toeplitz.jl")
