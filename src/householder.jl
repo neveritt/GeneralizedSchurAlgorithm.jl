@@ -1,20 +1,51 @@
-function _householder_left{M1<:StridedMatrix}(A::M1,first::Bool=true)
+function _householder_left(A::M1,first::Bool=true) where{M1<:StridedMatrix}
   T = eltype(A)
   N = size(A,2)
   x = A[:,1]
   n = length(x)
   α = x[1,1]
 
-  β, τ   = larfg!(α, view(x,2:n))
+  #β, τ   = LinearAlgebra.LAPACK.larfg!(α, view(x,2:n))
+  β,τ = mylarfg!(α,view(x,2:n))
   x[1,1] = one(T)
 
   A[2:n,1] = zeros(T,n-1)
   A[1,1]   = β[]
 
-  larfx!('L', view(A,:,2:N), x, τ[])
+  larf!('L', x, τ[], view(A,:,2:N))
 end
 
-for (larf, larfg, larfx, elty) in
+const liblapack = Base.liblapack_name
+
+# larfg! in Lapack does not return β, so mylarfg! is needed
+
+for (larfg, elty) in
+  ((:dlarfg_, Float64),
+   (:slarfg_, Float32),
+   (:zlarfg_, ComplexF64),
+   (:clarfg_, ComplexF32))
+  @eval begin
+      #        .. Scalar Arguments ..
+      #        INTEGER            incx, n
+      #        DOUBLE PRECISION   alpha, tau
+      #        ..
+      #        .. Array Arguments ..
+      #        DOUBLE PRECISION   x( * )
+      function mylarfg!(α::$elty,x::AbstractVector{$elty})
+          N    = BlasInt(length(x)+1)
+          #α    = Ref{$elty}(x[1])
+          incx = BlasInt(1)
+          τ    = Ref{$elty}(0)
+          β    = Ref{$elty}(α)
+          ccall((@blasfunc($larfg), liblapack), Cvoid,
+              (Ref{BlasInt}, Ref{$elty}, Ptr{$elty}, Ref{BlasInt}, Ref{$elty}),
+              N, β, pointer(x), incx, τ)
+          return β,τ
+      end
+  end
+end
+
+#= for (larf, larfg, larfx, elty) in
   ((:dlarf_,:dlarfg_,:dlarfx_,:Float64),
    (:slarf_,:slarfg_,:slarfx_,:Float32),
    (:zlarf_,:zlarfg_,:zlarfx_,:Complex128),
@@ -89,3 +120,4 @@ for (larf, larfg, larfx, elty) in
     end
   end
 end
+ =#

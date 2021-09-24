@@ -19,8 +19,11 @@ end
 #
 # col = C*R  - qr factorization of first column of A
 # S   = A.'*C
-"""
-  lstoeplitz(col, row, b) -> x, Q, R, D
+
+# SOMETHING DOES NOT WORK WITH THE FOLLOWING EXPLANATION (so I commented it out)
+
+#= """
+lstoeplitz(col, row, b) -> x, Q, R, D
 
 Backward stable solution of least squares problem Tx = b, where T is a Toeplitz
 matrix defined by the first block column `col` and first block row 'row'.
@@ -62,13 +65,15 @@ julia> norm(x-x̂)
 
 -  [1]: T. Kailath and A. H. Sayed, Fast Reliable Algorithms for Matrices
       with Structure, Society for Industrial and Applied Mathematics, 1999.
-"""
-function lstoeplitz{T1<:Number, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
+""" =#
+
+function lstoeplitz(A::BlockToeplitz{T1}, b::M1) where {T1<:Number, M1<:AbstractArray}
   T   = promote_type(T1,eltype(b),Float32)
   m,n = blocksize(A)
   k,l = sizeofblock(A)
   M,N = size(A)
   C,R = qr(getcol(A))
+  C=Matrix(C)
   S = A'*C
 
   # construct generator G
@@ -76,40 +81,41 @@ function lstoeplitz{T1<:Number, M1<:AbstractArray}(A::BlockToeplitz{T1}, b::M1)
   GR = view(G, 1:N, 1:2l+3k)
   GQ = view(G, N+1:N+M, 1:2l+3k)
   GR[:,1:l]         = S
-  GR[:,k+l+(1:l)]   = S
-  GR[1:l,k+l+(1:l)] = zeros(T, l,l)
+  GR[:,(k+l).+(1:l)]   = S
+  GR[1:l,(k+l).+(1:l)] = zeros(T, l,l)
   for i = 1:n-1
-    GR[i*l+(1:l),l+(1:k)]     = getblock(A,i).'
-    GR[i*l+(1:l),l+k+l+(1:k)] = getblock(A,i-m).'
+  GR[i*l.+(1:l),l.+(1:k)]     = getblock(A,i)'
+  GR[i*l.+(1:l),(l+k+l).+(1:k)] = getblock(A,i-m)'
   end
 
   β = 4*(m*k*n*l)^(4/3)*eps(T) # tuning parameter to ensure negative steps
   GQ[:,1:l]       = C
-  GQ[:,l+k+(1:l)] = C
+  GQ[:,(l+k).+(1:l)] = C
   for i = 1:k
-    GQ[i,l+i] = one(T)
-    GQ[i,2k+2l+i] = 1+β
+  GQ[i,l+i] = one(T)
+  GQ[i,2k+2l+i] = 1+β
   end
 
   # iterate
   p = k+l
   q = k+l+k
-  G = G.'
-  L = Array{T}(m*k+n*l,m*k+n*l)
+  G = Matrix(G')
+  L = Array{T}(undef,(m*k+n*l,m*k+n*l))
   N = m*k+n*l
   # positive steps
   for i = 1:n*l
-    @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
-    _downshift!(view(G,1,:),view(L,i,:),l,k,i,N,l*n)
+  @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
+  _downshift!(view(G,1,:),view(L,i,:),l,k,i,N,l*n)
   end
   # negative steps
   for i = n*l+1:N
-    @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,false)
-    _downshift!(view(G,p+1,:),view(L,i,:),l,k,i,N,l*n)
+  @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,false)
+  _downshift!(view(G,p+1,:),view(L,i,:),l,k,i,N,l*n)
   end
 
-  Q, R  = L[1:n*l, n*l+(1:m*k)].', triu(L[1:n*l, 1:n*l])
-  D     = tril(L[n*l+(1:m*k), n*l+(1:m*k)].')
-  x     = R\(D\Q).'*(D\b)
+  Q, R  = L[1:n*l, n*l.+(1:m*k)]', triu(L[1:n*l, 1:n*l])
+  D     = tril(L[n*l.+(1:m*k), n*l.+(1:m*k)]')
+  x     = R\(D\Q)'*(D\b)
   return x
 end
+

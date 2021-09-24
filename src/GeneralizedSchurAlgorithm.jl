@@ -1,15 +1,20 @@
 module GeneralizedSchurAlgorithm
 
 # Import functions for overloading
-import Base.LinAlg: A_mul_B!, A_mul_Bc!, At_mul_B!, At_mul_B
-import Base: size, eltype, getindex, convert, transpose, ctranspose, promote_rule
+
+import LinearAlgebra: mul!, rmul!, lmul!, norm, qr, triu, tril
+import Base: size, eltype, getindex, convert, transpose, adjoint, promote_rule
 import Compat.view
 
-import Base: linearindexing, promote_type, checkbounds
-import Base.LinAlg: BlasFloat, Char, BlasInt, LAPACKException, axpy!, BLAS.scal!
+# this stuff still needs some more attention
+import Base: promote_type, checkbounds
+import LinearAlgebra:  Char, axpy!, BLAS.scal! #maybe not needed anymore
+import LinearAlgebra: BLAS.@blasfunc, BlasFloat, BlasInt, LAPACKException, #maybe not everything here is needed
+DimensionMismatch, SingularException, PosDefException, chkstride1, checksquare,
+LAPACK.larf!, LAPACK.larfg!
 
 import Base: one, zero, +, -, /, *
-import ToeplitzMatrices: AbstractToeplitz, Toeplitz, full
+import ToeplitzMatrices: AbstractToeplitz, Toeplitz, Matrix
 
 # Export only the useful functions
 export
@@ -21,6 +26,7 @@ export
   getblock,
   getcol,
   getrow,
+  mul!,
   # h_rotation
   H_procedure,
   h_procedure,

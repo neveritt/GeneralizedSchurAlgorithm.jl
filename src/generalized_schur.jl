@@ -24,18 +24,17 @@ function schuralgorithm(G,F,p,q,n)
     if sum(abs2, G[1:p,i]) - sum(abs2, G[p+1:end,i]) > 0
       _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
       D[i] = 1
-      G[1,i:N] = (L[i:i,i:N]*F[i:N,i:N]).'
+      G[1,i:N] = (L[i:i,i:N]*F[i:N,i:N])'
     else
       _step(view(G,:,i:N), view(L,i,i:N),p,q,false)
       D[i] = -1
-      G[p+1,i:N] = (L[i:i,i:N]*F[i:N,i:N]).'
+      G[p+1,i:N] = (L[i:i,i:N]*F[i:N,i:N])'
     end
   end
   L, D
 end
 
-function _step{M1<:StridedMatrix}(
-    G::M1,L,p::Int,q::Int,pos::Bool)
+function _step(G::M1,L,p::Int,q::Int,pos::Bool) where {M1<:StridedMatrix}
   @assert eltype(G) == eltype(L)
   T = eltype(G)
   N = size(G,2)
@@ -51,6 +50,6 @@ function _step{M1<:StridedMatrix}(
     G[idx1,1] = abs(G[idx2,1])*(1 + 3*eps(T))*sign(G[1,1])
   end
   h = h_procedure(G[idx1,1],G[idx2,1],idx1,idx2)[1]
-  A_mul_B!(h, G)
+  mul!(h, G)
   L[:] = G[idx1,:]
 end

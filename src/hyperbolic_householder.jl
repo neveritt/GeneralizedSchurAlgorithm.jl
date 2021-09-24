@@ -1,3 +1,5 @@
+# still old versions, not reviewed at all 
+
 function _hyper_householder{M1<:AbstractMatrix}(A::M1,g::Int,p::Int,q::Int,work::M1)
   gp   = g[1:p]
   gq   = g[p+1:p+q]

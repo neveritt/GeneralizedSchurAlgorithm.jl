@@ -15,7 +15,7 @@ h1  = h_procedure(C[1,1],Ch[2,1],1,2)[1]
 h11 = H_procedure(h1.i1, h1.i2, h1.α, h1.β, h1.ρ)
 h12 = h_procedure(C,1,2,1)[1]
 
-for field in fieldnames(h1)
+for field in fieldnames(typeof(h1))
   # H_procedure has a sign difference which is introduce in matrix constructor for increas numerical accuracy
   @test abs.(getfield(h1,field)) ≈ abs.(getfield(h11,field))
   @test getfield(h1,field)      ≈ getfield(h12,field)
@@ -23,7 +23,7 @@ end
 h2  = oe_procedure(C[1,1],Ch[2,1],1,2)[1]
 h21 = OE_procedure(h2.i1, h2.i2, h2.c, h2.s)
 h22 = oe_procedure(C,1,2,1)[1]
-for field in fieldnames(h2)
+for field in fieldnames(typeof(h2))
   @test getfield(h2,field) ≈ getfield(h21,field) ≈ getfield(h22,field)
 end
 
@@ -36,8 +36,6 @@ end
 # test conjugate transpose
 @test h1' == h1
 @test h2' == h2
-@test h1.' == h1
-@test h2.' == h2
 
 # left-side multiplication
 idx2 = 5
@@ -49,13 +47,13 @@ for idx1 = 1:4
     Cr[idx1,idx1],  Cr[idx2,idx1]  = Cr[idx2,idx1],  Cr[idx1,idx1]
   end
   # h-procedure
-  h1 = h_procedure(Ch[idx1,idx1],Ch[idx2,idx1],idx1,idx2)[1]
-  A_mul_B!(h1, Ch)
+  h3 = h_procedure(Ch[idx1,idx1],Ch[idx2,idx1],idx1,idx2)[1]
+  mul!(h3, Ch)
   @test norm(Ch[idx2,idx1]) < ϵ_t
 
   # oe-procedure
-  h2 = oe_procedure(Coe[idx1,idx1],Coe[idx2,idx1],idx1,idx2)[1]
-  A_mul_B!(h2, Coe)
+  h4 = oe_procedure(Coe[idx1,idx1],Coe[idx2,idx1],idx1,idx2)[1]
+  mul!(h4, Coe)
   @test norm(Coe[idx2,idx1]) < ϵ_t
 
   # reference implementation
@@ -68,12 +66,12 @@ for idx1 = 1:4
     Cr[idx2,i] = c*y1 + s*x1
   end
 
-  @test h1[idx1,idx1]   ≈ h2[idx1,idx1] ≈ c
-  @test h1[idx2,idx2]   ≈ h2[idx2,idx2] ≈ c
-  @test h1[idx1,idx2]   ≈ h2[idx1,idx2] ≈ s
-  @test h1[idx2,idx1]   ≈ h2[idx2,idx1] ≈ s
-  @test h1[10,10]       ≈ h2[10,10]     ≈ 1
-  @test h1[10,1]        ≈ h2[10,1]      ≈ 0
+  @test h3[idx1,idx1]   ≈ h4[idx1,idx1] ≈ c
+  @test h3[idx2,idx2]   ≈ h4[idx2,idx2] ≈ c
+  @test h3[idx1,idx2]   ≈ h4[idx1,idx2] ≈ s
+  @test h3[idx2,idx1]   ≈ h4[idx2,idx1] ≈ s
+  @test h3[10,10]       ≈ h4[10,10]     ≈ 1
+  @test h3[10,1]        ≈ h4[10,1]      ≈ 0
 end
 
 @test norm(Ch  - Cr)    < ϵ_t
@@ -94,12 +92,12 @@ for idx1 = 1:4
   end
   # h-procedure
   h1 = h_procedure(Ch[idx1,idx1],Ch[idx1,idx2],idx1,idx2)[1]
-  A_mul_Bc!(Ch, h1)
+  mul!(Ch, h1)
   @test norm(Ch[idx1,idx2])  < ϵ_t
 
   # oe-procedure
   h2 = oe_procedure(Coe[idx1,idx1],Coe[idx1,idx2],idx1,idx2)[1]
-  A_mul_Bc!(Coe, h2)
+  mul!(Coe, h2)
   @test norm(Coe[idx1,idx2]) < ϵ_t
 
   # reference implementation

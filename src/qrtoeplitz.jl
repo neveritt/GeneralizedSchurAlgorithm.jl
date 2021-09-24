@@ -38,40 +38,41 @@ end
 #   ⋮        ⋮      ⋮     ⋮
 #   C_{m-1}   0    C_{m-1}  0]
 #
-function qrtoeplitz{T<:Number}(A::BlockToeplitz{T})
+function qrtoeplitz(A::BlockToeplitz{T}) where{T<:Number}
   m,n = blocksize(A)
   k,l = sizeofblock(A)
   M,N = size(A)
   C,R = qr(getcol(A))
-  S   = A.'*C
+  C = Matrix(C)
+  S   = A'*C
 
   # construct generator G
   G  = zeros(T,N+M, l+k+l+k)
   GR = view(G, 1:N, 1:2l+2k)
   GQ = view(G, N+1:N+M, 1:2l+2k)
   GR[:,1:l]         = S
-  GR[:,k+l+(1:l)]   = S
-  GR[1:l,k+l+(1:l)] = zeros(T,l,l)
+  GR[:,(k+l).+(1:l)]   = S
+  GR[1:l,(k+l).+(1:l)] = zeros(T,l,l)
   for i = 1:n-1
-    GR[i*l+(1:l),l+(1:k)]     = getblock(A,i).'
-    GR[i*l+(1:l),l+k+l+(1:k)] = getblock(A,i-m).'
+    GR[i*l.+(1:l),l.+(1:k)]     = getblock(A,i)'
+    GR[i*l.+(1:l),(l+k+l).+(1:k)] = getblock(A,i-m)'
   end
   GQ[:,1:l]       = C
-  GQ[:,l+k+(1:l)] = C
+  GQ[:,(l+k).+(1:l)] = C
   for i = 1:k
     GQ[i,l+i] = one(T)
   end
-
   # iterate
   p = k+l
   q = k+l
-  L = Array{T}(n*l,m*k+n*l)
-  G = G.'
+  L = Array{T}(undef,n*l,m*k+n*l)
+  G = Matrix(G')
   N = size(G,2)
   for i = 1:n*l
-    @inbounds _step(view(G,:,i:N), view(L,i,i:N),p,q,true)
-    _downshift!(view(G,1,:),view(L,i,:),l,k,i,N,l*n)
+    @inbounds GeneralizedSchurAlgorithm._step(view(G,:,i:N), view(L,i,i:N),p,q,true)
+    GeneralizedSchurAlgorithm._downshift!(view(G,1,:),view(L,i,:),l,k,i,N,l*n)
   end
 
-  return L[1:n*l, n*l+(1:m*k)].', triu(L[1:n*l, 1:n*l])
+  return L[1:n*l, n*l.+(1:m*k)]', triu(L[1:n*l, 1:n*l])
 end
+

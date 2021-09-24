@@ -18,8 +18,11 @@ x̂  = lstoeplitz(T,Y)
 x1 = lstoeplitz(getcol(T),getrow(T),Y)
 @test norm(x̂-x1) < ϵ_t
 
-Q,R = qr(full(T))
-x = R\(Q.'*Y)
+@time begin
+Q,R = qr(Matrix(T))
+Q=Matrix(Q)
+x = R\(Q'*Y)
+end
 @test norm(x̂-x) < 1e-3
 
 # test against true parameters
